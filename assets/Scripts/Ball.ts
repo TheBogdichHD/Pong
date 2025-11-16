@@ -7,13 +7,12 @@ import {
     Vec3,
     instantiate,
     AudioSource,
-    CircleCollider2D,
     Contact2DType,
     Collider2D,
     AudioClip,
 } from 'cc';
 import { ScoreManager } from './ScoreManager';
-import { hapticFeedback } from '@tma.js/sdk';
+import { postEvent } from '@tma.js/sdk';
 
 const { ccclass, property } = _decorator;
 
@@ -49,7 +48,6 @@ export class Ball extends Component {
     private _rigidBody: RigidBody2D = null;
     private _lastScorer: 'player' | 'bot' = 'player';
     private _audioSource: AudioSource = null;
-    private _hapticInitialized: boolean = false;
 
     onLoad() {
         this._rigidBody = this.getComponent(RigidBody2D);
@@ -69,17 +67,15 @@ export class Ball extends Component {
     }
 
     triggerVibration() {
-        if (!this.enableVibration) return;
-
         try {
-            if (hapticFeedback.impactOccurred.isAvailable()) {
-                hapticFeedback.impactOccurred('medium');
-            }
+            postEvent('web_app_trigger_haptic_feedback', {
+                type: 'notification',
+                notification_type: 'warning',
+            });
         } catch (e) {
             console.error('Vibration error:', e);
         }
     }
-
     playHitSound() {
         const randomVolume = 0.7 + Math.random() * 0.3;
 
